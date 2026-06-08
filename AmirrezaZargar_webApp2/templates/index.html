@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Monitor</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+          background: {{ theme.bg }};
+          color: #e2e8f0;
+          font-family: 'Segoe UI', Arial, sans-serif;
+          min-height: 100vh;
+          padding: 30px 20px;
+      }
+
+      .container {
+          max-width: 900px;
+          margin: 0 auto;
+      }
+
+      /* header */
+      .header {
+          text-align: center;
+          margin-bottom: 30px;
+      }
+      .header h1 {
+          font-size: 2rem;
+          color: {{ theme.accent }};
+          letter-spacing: 2px;
+          text-transform: uppercase;
+      }
+      .header .subtitle {
+          color: #94a3b8;
+          margin-top: 6px;
+          font-size: 0.9rem;
+      }
+
+      /* grid cards*/
+      .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 20px;
+          margin-bottom: 20px;
+      }
+
+      /* cards */
+      .card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+          padding: 24px;
+          backdrop-filter: blur(10px);
+      }
+      .card-title {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #64748b;
+          margin-bottom: 12px;
+      }
+      .card-value {
+          font-size: 2.2rem;
+          font-weight: 700;
+          color: {{ theme.accent }};
+      }
+      .card-sub {
+          font-size: 0.85rem;
+          color: #94a3b8;
+          margin-top: 4px;
+      }
+
+      /* Progress Bar */
+      .progress-wrap {
+          margin-top: 14px;
+          background: rgba(255,255,255,0.08);
+          border-radius: 99px;
+          height: 8px;
+          overflow: hidden;
+      }
+      .progress-bar {
+          height: 100%;
+          border-radius: 99px;
+          background: {{ theme.accent }};
+          transition: width 0.4s ease;
+      }
+      /* رنگ هشدار وقتی بالای ۸۰٪ */
+      .progress-bar.warn { background: #f87171; }
+
+      
+      .info-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          font-size: 0.9rem;
+      }
+      .info-row:last-child { border-bottom: none; }
+      .info-label { color: #64748b; }
+      .info-val { color: #e2e8f0; font-weight: 500; }
+
+      /* proc-table*/
+      .proc-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.85rem;
+      }
+      .proc-table th {
+          text-align: left;
+          color: #64748b;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          padding: 0 0 10px 0;
+      }
+      .proc-table td {
+          padding: 7px 0;
+          border-top: 1px solid rgba(255,255,255,0.05);
+          color: #cbd5e1;
+      }
+      .proc-table td:last-child { text-align: right; color: {{ theme.accent }}; }
+
+      /* footer */
+      .footer {
+          text-align: center;
+          margin-top: 24px;
+          color: #475569;
+          font-size: 0.8rem;
+      }
+      .refresh-btn {
+          display: inline-block;
+          margin-top: 12px;
+          padding: 10px 28px;
+          background: {{ theme.accent }};
+          color: #0f172a;
+          border-radius: 99px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 0.85rem;
+          letter-spacing: 1px;
+          transition: opacity 0.2s;
+      }
+      .refresh-btn:hover { opacity: 0.8; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- header -->
+      <div class="header">
+        <h1>⚡ Amirreza System Monitoring</h1>
+        <div class="subtitle">
+          {{ date }} &nbsp;|&nbsp; {{ time }} &nbsp;|&nbsp; {{ hostname }}
+        </div>
+      </div>
+
+      <!--first: CPU / RAM / Disk -->
+      <div class="grid">
+        <!-- CPU -->
+        <div class="card">
+          <div class="card-title">💻 CPU Usage</div>
+          <div class="card-value">{{ cpu }}%</div>
+          <div class="card-sub">{{ cpu_cores }} Cores</div>
+          <div class="progress-wrap">
+            <div
+              class="progress-bar {% if cpu > 80 %}warn{% endif %}"
+              style="width: {{ cpu }}%"
+            ></div>
+          </div>
+        </div>
+
+        <!-- RAM -->
+        <div class="card">
+          <div class="card-title">🧠 Memory</div>
+          <div class="card-value">{{ ram_percent }}%</div>
+          <div class="card-sub">{{ ram_used }} GB / {{ ram_total }} GB</div>
+          <div class="progress-wrap">
+            <div
+              class="progress-bar {% if ram_percent > 80 %}warn{% endif %}"
+              style="width: {{ ram_percent }}%"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Disk -->
+        <div class="card">
+          <div class="card-title">💾 Disk</div>
+          <div class="card-value">{{ disk_percent }}%</div>
+          <div class="card-sub">{{ disk_used }} GB / {{ disk_total }} GB</div>
+          <div class="progress-wrap">
+            <div
+              class="progress-bar {% if disk_percent > 80 %}warn{% endif %}"
+              style="width: {{ disk_percent }}%"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- second: اطلاعات سیستم + شبکه -->
+      <div class="grid">
+        <!-- System Info -->
+        <div class="card">
+          <div class="card-title">🖥️ System Info</div>
+          <div class="info-row">
+            <span class="info-label">OS</span>
+            <span class="info-val">{{ os }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Uptime</span>
+            <span class="info-val">{{ uptime }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Python</span>
+            <span class="info-val">{{ python_ver }}</span>
+          </div>
+        </div>
+
+        <!-- Network -->
+        <div class="card">
+          <div class="card-title">🌐 Network I/O</div>
+          <div class="info-row">
+            <span class="info-label">⬆ Sent</span>
+            <span class="info-val">{{ network.sent }} MB</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">⬇ Received</span>
+            <span class="info-val">{{ network.recv }} MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!--third: Top Processes -->
+      <div class="card">
+        <div class="card-title">📊 Top Processes (by CPU)</div>
+        <table class="proc-table">
+          <thead>
+            <tr>
+              <th>PID</th>
+              <th>Name</th>
+              <th>Memory %</th>
+              <th>CPU %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in top_procs %}
+            <tr>
+              <td>{{ p.pid }}</td>
+              <td>{{ p.name[:25] }}</td>
+              <td>{{ "%.1f"|format(p.memory_percent) }}%</td>
+              <td>{{ p.cpu_percent }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- footer -->
+      <!-- footer -->
+      <div class="footer">
+        <div>Background changes on every refresh ✨</div>
+        <a class="refresh-btn" href="/">↻ Refresh</a>
+        <div style="margin-top: 16px; font-size: 0.75rem; color: #334155">
+          Developed by
+          <span style="color: #000000; font-weight: 600">Amirreza Zargar</span>
+          &nbsp;·&nbsp; Amirreza Co. &copy; 2026
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
