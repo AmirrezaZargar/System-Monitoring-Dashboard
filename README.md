@@ -1,2 +1,7 @@
 # System-Monitoring-Dashboard
-Three containerized Flask web apps monitoring real-time CPU, RAM, and process stats — each with a unique UI, powered by Docker Compose.
+
+A collection of three containerized web-App system monitoring applications built with Flask, each presenting real-time CPU, RAM, and process metrics through a distinct UI approach.
+Projects Overview
+Each project is independently Dockerized and managed via Docker Compose, demonstrating different frontend design approaches for the same monitoring core.
+Project Description:
+
